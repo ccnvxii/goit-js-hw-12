@@ -56,10 +56,14 @@ form.addEventListener('submit', async function (event) {
     createGallery(response.hits);
     loadedImages += response.hits.length;
 
-    if (loadedImages < totalHits) {
-      showLoadMoreButton();
-    } else {
+    if (loadedImages >= totalHits) {
       hideLoadMoreButton();
+      iziToast.info({
+        message: "We're sorry, but you've reached the end of search results.",
+        position: 'topRight',
+      });
+    } else {
+      showLoadMoreButton();
     }
   } catch (error) {
     iziToast.error({
@@ -79,7 +83,6 @@ loadMoreBtn.addEventListener('click', async function () {
   try {
     const response = await getImagesByQuery(query, page);
     createGallery(response.hits);
-
     loadedImages += response.hits.length;
 
     if (loadedImages >= totalHits) {
@@ -93,10 +96,16 @@ loadMoreBtn.addEventListener('click', async function () {
       showLoadMoreButton();
     }
 
-    window.scrollBy({
-      top: window.innerHeight,
-      behavior: 'smooth',
-    });
+    const galleryItems = document.querySelectorAll('.photo-card');
+    if (galleryItems.length > 0) {
+      const firstNewCard = galleryItems[loadedImages - response.hits.length];
+      const cardHeight = firstNewCard.getBoundingClientRect().height;
+
+      window.scrollBy({
+        top: cardHeight * 2,
+        behavior: 'smooth',
+      });
+    }
   } catch (error) {
     iziToast.error({
       message: 'Something went wrong. Try again!',
